@@ -18,7 +18,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install required Python packages
-        run: pip install openai
+        run: pip install "openai>=1.0.0"
 
       - name: Extract issue body to file
         run: |
@@ -45,7 +45,7 @@ jobs:
           import re
 
           prompt = open('llm_input.txt').read()
-          openai.api_key = os.getenv('OPENAI_API_KEY')
+          client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
           system_message = (
               "You are an expert software engineer. "
               "Given the following GitHub issue and repository file list, generate the necessary code to implement the requested feature or fix. "
@@ -54,7 +54,7 @@ jobs:
               "Do not describe, just output the code blocks for all files you create or update. "
               "Only output code blocks."
           )
-          response = openai.ChatCompletion.create(
+          response = client.chat.completions.create(
               model="gpt-4o",
               messages=[
                   {"role": "system", "content": system_message},
@@ -62,7 +62,7 @@ jobs:
               ],
               max_tokens=4096
           )
-          content = response.choices[0].message['content']
+          content = response.choices[0].message.content
           code_block_pattern = r"###([a-zA-Z0-9 \-]*)\\s+name=([^\n]+)\\n([\\s\\S]*?)"
           matches = re.findall(code_block_pattern, content)
           if not matches:
@@ -73,12 +73,12 @@ jobs:
               filename = filename.strip()
               os.makedirs(os.path.dirname(filename), exist_ok=True)
               with open(filename, "w") as f:
-                  f.write(code.lstrip('\n'))
+                  f.write(code.lstrip('\\n'))
               changed_files.append(filename)
           # Save a list of changed files for summary step
           with open("changed_files.txt", "w") as f:
               for fname in changed_files:
-                  f.write(fname + "\n")
+                  f.write(fname + "\\n")
           EOF
 
       - name: Create feature branch, commit, and push generated files
@@ -102,22 +102,22 @@ jobs:
           import openai
           import os
 
-          openai.api_key = os.getenv('OPENAI_API_KEY')
+          client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
           issue_title = """${{ github.event.issue.title }}"""
           issue_body = open("issue_prompt.txt").read()
           changed_files = open("changed_files.txt").read().splitlines()
           summary_prompt = (
-              f"The following files were created or updated:\n" +
-              "\n".join(f"- {f}" for f in changed_files) +
-              "\n\n" +
-              "Below is the GitHub issue title and description that triggered these changes:\n"
-              f"Title: {issue_title}\n"
-              f"Description: {issue_body}\n\n"
+              f"The following files were created or updated:\\n" +
+              "\\n".join(f"- {f}" for f in changed_files) +
+              "\\n\\n" +
+              "Below is the GitHub issue title and description that triggered these changes:\\n"
+              f"Title: {issue_title}\\n"
+              f"Description: {issue_body}\\n\\n"
               "Summarize the code changes that were made to address the issue. "
               "Do not just repeat the issue description; explain what the code does and how it solves the problem. "
               "Format your summary in markdown and keep it concise."
           )
-          response = openai.ChatCompletion.create(
+          response = client.chat.completions.create(
               model="gpt-4o",
               messages=[
                   {"role": "system", "content": "You are an expert software engineer who summarizes code changes for pull requests."},
@@ -125,10 +125,10 @@ jobs:
               ],
               max_tokens=512
           )
-          summary = response.choices[0].message['content']
+          summary = response.choices[0].message.content
           # Add a link to the triggering issue at the end
           issue_url = "${{ github.event.issue.html_url }}"
-          summary_with_link = summary + f"\n\n---\n[See the original issue here]({issue_url})"
+          summary_with_link = summary + f"\\n\\n---\\n[See the original issue here]({issue_url})"
           with open("pr_body.md", "w") as f:
               f.write(summary_with_link)
           EOF
