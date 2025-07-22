@@ -63,7 +63,7 @@ jobs:
               max_tokens=4096
           )
           content = response.choices[0].message['content']
-          code_block_pattern = r"###([a-zA-Z0-9 \-]*)\\s+name=([^\n]+)\\n([\\s\\S]*?)```"
+          code_block_pattern = r"###([a-zA-Z0-9 \-]*)\\s+name=([^\n]+)\\n([\\s\\S]*?)"
           matches = re.findall(code_block_pattern, content)
           if not matches:
               raise Exception("No code blocks found in LLM output.")
