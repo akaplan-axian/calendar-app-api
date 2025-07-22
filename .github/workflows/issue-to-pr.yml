@@ -50,7 +50,7 @@ jobs:
               "You are an expert software engineer. "
               "Given the following GitHub issue and repository file list, generate the necessary code to implement the requested feature or fix. "
               "Do not specify programming language in your output; instead, infer the language(s) required based on the existing repository code or the issue prompt. "
-              "Output your response as a list of code blocks, each starting with triple backticks and the full filename in the header, e.g., ```python name=src/myfile.py. "
+              "Output your response as a list of code blocks, each starting with triple hash tags and the full filename in the header, e.g., ###python name=src/myfile.py. "
               "Do not describe, just output the code blocks for all files you create or update. "
               "Only output code blocks."
           )
@@ -63,7 +63,7 @@ jobs:
               max_tokens=4096
           )
           content = response.choices[0].message['content']
-          code_block_pattern = r"```([a-zA-Z0-9 \-]*)\\s+name=([^\n]+)\\n([\\s\\S]*?)```"
+          code_block_pattern = r"###([a-zA-Z0-9 \-]*)\\s+name=([^\n]+)\\n([\\s\\S]*?)```"
           matches = re.findall(code_block_pattern, content)
           if not matches:
               raise Exception("No code blocks found in LLM output.")
