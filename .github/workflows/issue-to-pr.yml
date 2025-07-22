@@ -1,0 +1,151 @@
+name: Create PR from Issue
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.issue.title, 'Feature:')
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install required Python packages
+        run: pip install openai
+
+      - name: Extract issue body to file
+        run: |
+          echo "${{ github.event.issue.body }}" > issue_prompt.txt
+
+      - name: Generate repository file tree
+        run: |
+          find . -type f -not -path './.git/*' > repo_file_list.txt
+
+      - name: Concatenate issue prompt and repo file tree for LLM context
+        run: |
+          echo "### GitHub Issue Prompt" > llm_input.txt
+          cat issue_prompt.txt >> llm_input.txt
+          echo "\n### Existing Repository File List" >> llm_input.txt
+          cat repo_file_list.txt >> llm_input.txt
+
+      - name: Generate code files with LLM
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python <<EOF
+          import openai
+          import os
+          import re
+
+          prompt = open('llm_input.txt').read()
+          openai.api_key = os.getenv('OPENAI_API_KEY')
+          system_message = (
+              "You are an expert software engineer. "
+              "Given the following GitHub issue and repository file list, generate the necessary code to implement the requested feature or fix. "
+              "Do not specify programming language in your output; instead, infer the language(s) required based on the existing repository code or the issue prompt. "
+              "Output your response as a list of code blocks, each starting with triple backticks and the full filename in the header, e.g., ```python name=src/myfile.py. "
+              "Do not describe, just output the code blocks for all files you create or update. "
+              "Only output code blocks."
+          )
+          response = openai.ChatCompletion.create(
+              model="gpt-4o",
+              messages=[
+                  {"role": "system", "content": system_message},
+                  {"role": "user", "content": prompt}
+              ],
+              max_tokens=4096
+          )
+          content = response.choices[0].message['content']
+          code_block_pattern = r"```([a-zA-Z0-9 \-]*)\\s+name=([^\n]+)\\n([\\s\\S]*?)```"
+          matches = re.findall(code_block_pattern, content)
+          if not matches:
+              raise Exception("No code blocks found in LLM output.")
+          changed_files = []
+          for lang, filename, code in matches:
+              # Clean up filename and write file
+              filename = filename.strip()
+              os.makedirs(os.path.dirname(filename), exist_ok=True)
+              with open(filename, "w") as f:
+                  f.write(code.lstrip('\n'))
+              changed_files.append(filename)
+          # Save a list of changed files for summary step
+          with open("changed_files.txt", "w") as f:
+              for fname in changed_files:
+                  f.write(fname + "\n")
+          EOF
+
+      - name: Create feature branch, commit, and push generated files
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          issue_number=${{ github.event.issue.number }}
+          branch_name="feature/issue-${issue_number}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch_name"
+          git add .
+          git commit -m "feat: auto-generate code for #$issue_number"
+          git push origin "$branch_name"
+
+      - name: Generate code summary with LLM for PR body
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python <<EOF
+          import openai
+          import os
+
+          openai.api_key = os.getenv('OPENAI_API_KEY')
+          issue_title = """${{ github.event.issue.title }}"""
+          issue_body = open("issue_prompt.txt").read()
+          changed_files = open("changed_files.txt").read().splitlines()
+          summary_prompt = (
+              f"The following files were created or updated:\n" +
+              "\n".join(f"- {f}" for f in changed_files) +
+              "\n\n" +
+              "Below is the GitHub issue title and description that triggered these changes:\n"
+              f"Title: {issue_title}\n"
+              f"Description: {issue_body}\n\n"
+              "Summarize the code changes that were made to address the issue. "
+              "Do not just repeat the issue description; explain what the code does and how it solves the problem. "
+              "Format your summary in markdown and keep it concise."
+          )
+          response = openai.ChatCompletion.create(
+              model="gpt-4o",
+              messages=[
+                  {"role": "system", "content": "You are an expert software engineer who summarizes code changes for pull requests."},
+                  {"role": "user", "content": summary_prompt}
+              ],
+              max_tokens=512
+          )
+          summary = response.choices[0].message['content']
+          # Add a link to the triggering issue at the end
+          issue_url = "${{ github.event.issue.html_url }}"
+          summary_with_link = summary + f"\n\n---\n[See the original issue here]({issue_url})"
+          with open("pr_body.md", "w") as f:
+              f.write(summary_with_link)
+          EOF
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+          sudo apt-add-repository https://cli.github.com/packages
+          sudo apt-get update
+          sudo apt-get install gh -y
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          issue_number=${{ github.event.issue.number }}
+          branch_name="feature/issue-${issue_number}"
+          pr_title="${{ github.event.issue.title }}"
+          pr_body="$(cat pr_body.md)"
+          gh pr create --base main --head "$branch_name" --title "$pr_title" --body "$pr_body"
