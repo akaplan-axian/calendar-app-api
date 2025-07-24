@@ -35,7 +35,7 @@ jobs:
           echo "\n### Existing Repository File List" >> llm_input.txt
           cat repo_file_list.txt >> llm_input.txt
 
-      - name: Generate code files with LLM
+      - name: Generate git patch with LLM
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
@@ -48,11 +48,10 @@ jobs:
           client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
           system_message = (
               "You are an expert software engineer. "
-              "Given the following GitHub issue and repository file list, generate the necessary code to implement the requested feature or fix. "
-              "Do not specify programming language in your output; instead, infer the language(s) required based on the existing repository code or the issue prompt. "
-              "Output your response as a list of code blocks, each starting with triple hash tags and the full filename in the header, e.g., ###python name=src/myfile.py. "
-              "Do not describe, just output the code blocks for all files you create or update. "
-              "Only output code blocks."
+              "Given the following GitHub issue and repository file list, generate the necessary code changes to implement the requested feature or fix. "
+              "Output your response as a single git patch in unified diff format. "
+              "The patch must be directly applicable with git apply. "
+              "Do not output any description, only a single code block containing the full patch."
           )
           response = client.chat.completions.create(
               model="gpt-4o",
@@ -69,23 +68,23 @@ jobs:
           print(content)
           print("========== END LLM RAW OUTPUT ==========")
 
-          code_block_pattern = r"###([a-zA-Z0-9 \-]*)\\s+name=([^\n]+)\\n([\\s\\S]*?)"
-          matches = re.findall(code_block_pattern, content)
-          if not matches:
-              raise Exception("No code blocks found in LLM output.")
-          changed_files = []
-          for lang, filename, code in matches:
-              # Clean up filename and write file
-              filename = filename.strip()
-              os.makedirs(os.path.dirname(filename), exist_ok=True)
-              with open(filename, "w") as f:
-                  f.write(code.lstrip('\\n'))
-              changed_files.append(filename)
-          # Save a list of changed files for summary step
-          with open("changed_files.txt", "w") as f:
-              for fname in changed_files:
-                  f.write(fname + "\\n")
+          # Extract patch (assume LLM outputs a single code block with patch)
+          patch_match = re.search(r' diff|patch)?\\n([\\s\\S]*?) ', content)
+          if not patch_match:
+              raise Exception("No git patch found in LLM output.")
+          patch = patch_match.group(1)
+
+          with open("llm_patch.diff", "w") as f:
+              f.write(patch)
           EOF
+
+      - name: Apply LLM-generated patch
+        run: |
+          git apply llm_patch.diff
+
+      - name: List changed files
+        run: |
+          git diff --name-only > changed_files.txt
 
       - name: Create feature branch, commit, and push generated files
         env:
@@ -113,12 +112,12 @@ jobs:
           issue_body = open("issue_prompt.txt").read()
           changed_files = open("changed_files.txt").read().splitlines()
           summary_prompt = (
-              f"The following files were created or updated:\\n" +
-              "\\n".join(f"- {f}" for f in changed_files) +
-              "\\n\\n" +
-              "Below is the GitHub issue title and description that triggered these changes:\\n"
-              f"Title: {issue_title}\\n"
-              f"Description: {issue_body}\\n\\n"
+              "The following files were created or updated:\n" +
+              "\n".join(f"- {f}" for f in changed_files) +
+              "\n\n" +
+              "Below is the GitHub issue title and description that triggered these changes:\n"
+              f"Title: {issue_title}\n"
+              f"Description: {issue_body}\n\n"
               "Summarize the code changes that were made to address the issue. "
               "Do not just repeat the issue description; explain what the code does and how it solves the problem. "
               "Format your summary in markdown and keep it concise."
@@ -140,7 +139,7 @@ jobs:
 
           # Add a link to the triggering issue at the end
           issue_url = "${{ github.event.issue.html_url }}"
-          summary_with_link = summary + f"\\n\\n---\\n[See the original issue here]({issue_url})"
+          summary_with_link = summary + f"\n\n---\n[See the original issue here]({issue_url})"
           with open("pr_body.md", "w") as f:
               f.write(summary_with_link)
           EOF
