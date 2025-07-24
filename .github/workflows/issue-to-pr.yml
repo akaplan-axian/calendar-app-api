@@ -50,8 +50,9 @@ jobs:
               "You are an expert software engineer. "
               "Given the following GitHub issue and repository file list, generate the necessary code changes to implement the requested feature or fix. "
               "Output your response as a single git patch in unified diff format. "
+              "Your output must be a patch only, not a code block, not markdown, not fenced. "
               "The patch must be directly applicable with git apply. "
-              "Do not output any description, only a single code block containing the full patch."
+              "Do not output any description, only the patch."
           )
           response = client.chat.completions.create(
               model="gpt-4o",
@@ -68,14 +69,9 @@ jobs:
           print(content)
           print("========== END LLM RAW OUTPUT ==========")
 
-          # Extract patch (assume LLM outputs a single code block with patch)
-          patch_match = re.search(r' diff|patch)?\\n([\\s\\S]*?) ', content)
-          if not patch_match:
-              raise Exception("No git patch found in LLM output.")
-          patch = patch_match.group(1)
-
+          # Save patch directly (no code block delimiters expected)
           with open("llm_patch.diff", "w") as f:
-              f.write(patch)
+              f.write(content)
           EOF
 
       - name: Apply LLM-generated patch
