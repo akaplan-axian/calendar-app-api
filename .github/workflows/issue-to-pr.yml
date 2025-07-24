@@ -28,12 +28,17 @@ jobs:
         run: |
           find . -type f -not -path './.git/*' > repo_file_list.txt
 
-      - name: Concatenate issue prompt and repo file tree for LLM context
+      - name: Concatenate issue prompt, repo file tree, and file contents for LLM context
         run: |
           echo "### GitHub Issue Prompt" > llm_input.txt
           cat issue_prompt.txt >> llm_input.txt
           echo "\n### Existing Repository File List" >> llm_input.txt
           cat repo_file_list.txt >> llm_input.txt
+          echo "\n### Current File Contents" >> llm_input.txt
+          while read f; do
+            echo "\n--- $f ---" >> llm_input.txt
+            cat "$f" >> llm_input.txt
+          done < repo_file_list.txt
 
       - name: Generate git patch with LLM
         env:
@@ -42,13 +47,12 @@ jobs:
           python <<EOF
           import openai
           import os
-          import re
 
           prompt = open('llm_input.txt').read()
           client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
           system_message = (
               "You are an expert software engineer. "
-              "Given the following GitHub issue and repository file list, generate the necessary code changes to implement the requested feature or fix. "
+              "Given the following GitHub issue, repository file list, and the current contents of each file, generate the necessary code changes to implement the requested feature or fix. "
               "Output your response as a single git patch in unified diff format. "
               "Your output must be a patch only, not a code block, not markdown, not fenced. "
               "The patch must be directly applicable with git apply. "
