@@ -63,6 +63,12 @@ jobs:
               max_tokens=4096
           )
           content = response.choices[0].message.content
+          
+          # Log LLM raw output to GitHub Actions log
+          print("========== LLM RAW OUTPUT ==========")
+          print(content)
+          print("========== END LLM RAW OUTPUT ==========")
+
           code_block_pattern = r"###([a-zA-Z0-9 \-]*)\\s+name=([^\n]+)\\n([\\s\\S]*?)"
           matches = re.findall(code_block_pattern, content)
           if not matches:
@@ -126,6 +132,12 @@ jobs:
               max_tokens=512
           )
           summary = response.choices[0].message.content
+
+          # Log LLM summary output to GitHub Actions log
+          print("========== LLM SUMMARY OUTPUT ==========")
+          print(summary)
+          print("========== END LLM SUMMARY OUTPUT ==========")
+
           # Add a link to the triggering issue at the end
           issue_url = "${{ github.event.issue.html_url }}"
           summary_with_link = summary + f"\\n\\n---\\n[See the original issue here]({issue_url})"
