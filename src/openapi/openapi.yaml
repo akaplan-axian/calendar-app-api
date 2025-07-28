@@ -29,21 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Calendar App API
-                  version:
-                    type: string
-                    example: 1.0.0
-                  status:
-                    type: string
-                    example: running
-                required:
-                  - message
-                  - version
-                  - status
+                $ref: '#/components/schemas/ApiInfo'
 
   /health:
     get:
@@ -58,18 +44,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: healthy
-                  timestamp:
-                    type: string
-                    format: date-time
-                    example: 2025-07-28T19:42:46.123Z
-                required:
-                  - status
-                  - timestamp
+                $ref: '#/components/schemas/HealthStatus'
 
   /api/events:
     get:
@@ -84,55 +59,224 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  events:
-                    type: array
-                    items:
-                      type: object
-                    example: []
-                  message:
-                    type: string
-                    example: Calendar events endpoint - ready for implementation
-                required:
-                  - events
-                  - message
+                $ref: '#/components/schemas/EventsResponse'
+    
+    post:
+      summary: Create a calendar event
+      description: Creates a new calendar event with validation
+      operationId: createCalendarEvent
+      tags:
+        - Events
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEventResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
 
 components:
+  schemas:
+    ApiInfo:
+      type: object
+      properties:
+        message:
+          type: string
+          examples: ["Calendar App API"]
+        version:
+          type: string
+          examples: ["1.0.0"]
+        status:
+          type: string
+          examples: ["running"]
+      required:
+        - message
+        - version
+        - status
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          examples: ["healthy"]
+        timestamp:
+          type: string
+          format: date-time
+          examples: ["2025-07-28T19:42:46.123Z"]
+      required:
+        - status
+        - timestamp
+
+    EventsResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+          examples: [[]]
+        message:
+          type: string
+          examples: ["Calendar events endpoint - ready for implementation"]
+      required:
+        - events
+        - message
+
+    CreateEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+          examples: ["Team Meeting"]
+        description:
+          type: string
+          maxLength: 500
+          examples: ["Weekly team sync meeting"]
+        startDate:
+          type: string
+          format: date-time
+          examples: ["2025-07-28T14:00:00Z"]
+        endDate:
+          type: string
+          format: date-time
+          examples: ["2025-07-28T15:00:00Z"]
+        location:
+          type: string
+          maxLength: 200
+          examples: ["Conference Room A"]
+      required:
+        - title
+        - startDate
+        - endDate
+
+    Event:
+      type: object
+      properties:
+        title:
+          type: string
+          examples: ["Team Meeting"]
+        description:
+          type: string
+          examples: ["Weekly team sync meeting"]
+        startDate:
+          type: string
+          format: date-time
+          examples: ["2025-07-28T14:00:00Z"]
+        endDate:
+          type: string
+          format: date-time
+          examples: ["2025-07-28T15:00:00Z"]
+        location:
+          type: string
+          examples: ["Conference Room A"]
+      required:
+        - title
+        - startDate
+        - endDate
+
+    CreateEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          examples: ["evt_123456"]
+        message:
+          type: string
+          examples: ["Event created successfully"]
+        event:
+          $ref: '#/components/schemas/Event'
+      required:
+        - id
+        - message
+        - event
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          examples: ["Route not found"]
+        path:
+          type: string
+          examples: ["/nonexistent"]
+      required:
+        - error
+        - path
+
+    InternalServerErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          examples: ["Something went wrong!"]
+        message:
+          type: string
+          examples: ["Internal server error"]
+      required:
+        - error
+        - message
+
+    ValidationErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+          examples: ["/title"]
+        message:
+          type: string
+          examples: ["must be string"]
+        rejectedValue:
+          examples: [null]
+      required:
+        - field
+        - message
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          examples: ["Validation failed"]
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationErrorDetail'
+      required:
+        - error
+        - details
+
   responses:
     NotFound:
       description: The requested resource was not found
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: Route not found
-              path:
-                type: string
-                example: /nonexistent
-            required:
-              - error
-              - path
+            $ref: '#/components/schemas/ErrorResponse'
 
     InternalServerError:
       description: Internal server error
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: Something went wrong!
-              message:
-                type: string
-                example: Internal server error
-            required:
-              - error
-              - message
+            $ref: '#/components/schemas/InternalServerErrorResponse'
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
 
 tags:
   - name: General

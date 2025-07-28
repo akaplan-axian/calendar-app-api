@@ -57,11 +57,61 @@ For each API change, verify the OpenAPI spec includes:
 The OpenAPI specification must:
 - Use OpenAPI 3.1.0 (latest version)
 - Be in YAML format
+- **ALL JSON schemas MUST be defined in `components/schemas` section**
+- **Use JSON pointers ($ref) to reference schemas from paths**
 - Include complete schemas with required fields
 - Provide realistic examples
 - Document all possible response codes
 - Use consistent naming conventions
 - Include proper descriptions for all endpoints
+
+### 📐 Schema Organization Policy
+
+**MANDATORY: All schemas must be centralized in `components/schemas`**
+
+✅ **CORRECT - Use $ref pointers:**
+```yaml
+paths:
+  /api/events:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEventResponse'
+
+components:
+  schemas:
+    CreateEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        # ... other properties
+````
+
+❌ __INCORRECT - Inline schemas:__
+
+```yaml
+paths:
+  /api/events:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                # ... inline schema definition
+```
 
 ### 🔍 Validation
 
