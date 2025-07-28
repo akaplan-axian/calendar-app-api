@@ -1,0 +1,143 @@
+openapi: 3.1.0
+info:
+  title: Calendar App API
+  description: API for calendar application
+  version: 1.0.0
+  contact:
+    url: https://github.com/akaplan-axian/calendar-app-api
+  license:
+    name: ISC
+    url: https://opensource.org/licenses/ISC
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server (placeholder)
+
+paths:
+  /:
+    get:
+      summary: Get API information
+      description: Returns basic information about the Calendar App API
+      operationId: getApiInfo
+      tags:
+        - General
+      responses:
+        '200':
+          description: API information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Calendar App API
+                  version:
+                    type: string
+                    example: 1.0.0
+                  status:
+                    type: string
+                    example: running
+                required:
+                  - message
+                  - version
+                  - status
+
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the API
+      operationId: getHealthStatus
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Health status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: 2025-07-28T19:42:46.123Z
+                required:
+                  - status
+                  - timestamp
+
+  /api/events:
+    get:
+      summary: Get calendar events
+      description: Returns a list of calendar events (currently returns empty array as placeholder)
+      operationId: getCalendarEvents
+      tags:
+        - Events
+      responses:
+        '200':
+          description: Calendar events retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      type: object
+                    example: []
+                  message:
+                    type: string
+                    example: Calendar events endpoint - ready for implementation
+                required:
+                  - events
+                  - message
+
+components:
+  responses:
+    NotFound:
+      description: The requested resource was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Route not found
+              path:
+                type: string
+                example: /nonexistent
+            required:
+              - error
+              - path
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Something went wrong!
+              message:
+                type: string
+                example: Internal server error
+            required:
+              - error
+              - message
+
+tags:
+  - name: General
+    description: General API information
+  - name: Health
+    description: Health check endpoints
+  - name: Events
+    description: Calendar events management
