@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index');
+const app = require('../src/express');
 
 describe('Calendar App API', () => {
   test('GET / should return API information', async () => {
