@@ -16,8 +16,47 @@ A RESTful API for calendar application built with Node.js 22 and Express.js.
 
 - Node.js 22.x
 - npm 10.x
+- nvm (Node Version Manager) - recommended
 
 ## Installation
+
+### Option 1: Using nvm (Recommended)
+
+1. Install nvm if you haven't already:
+```bash
+# On macOS/Linux
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+# Or using Homebrew on macOS
+brew install nvm
+```
+
+2. Clone the repository:
+```bash
+git clone https://github.com/akaplan-axian/calendar-app-api.git
+cd calendar-app-api
+```
+
+3. Install and use the correct Node.js version:
+```bash
+# Install Node.js 22 (specified in .nvmrc)
+nvm install
+
+# Use Node.js 22 for this project
+nvm use
+```
+
+4. Install dependencies:
+```bash
+npm install
+```
+
+5. Create environment file:
+```bash
+cp .env.example .env
+```
+
+### Option 2: Manual Node.js Installation
 
 1. Clone the repository:
 ```bash
@@ -25,12 +64,14 @@ git clone https://github.com/akaplan-axian/calendar-app-api.git
 cd calendar-app-api
 ```
 
-2. Install dependencies:
+2. Ensure you have Node.js 22.x installed on your system
+
+3. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Create environment file:
+4. Create environment file:
 ```bash
 cp .env.example .env
 ```
