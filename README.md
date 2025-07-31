@@ -205,7 +205,107 @@ npm run test:watch
 
 # Run tests with coverage
 npm run test:coverage
+
+# Run tests with coverage in watch mode
+npm run test:coverage:watch
+
+# Run coverage and open HTML report
+npm run test:coverage:open
+
+# Check coverage thresholds
+npm run coverage:check
 ```
+
+### Code Coverage
+
+This project uses **Jest's built-in code coverage** powered by Istanbul/nyc. The coverage tool is already configured and ready to use.
+
+#### Coverage Configuration
+
+Coverage settings are defined in `jest.config.js`:
+
+- **Global Thresholds**: 70% for statements, branches, functions, and lines
+- **Route-Specific Thresholds**: Higher thresholds (80-90%) for critical route files
+- **Excluded Files**: Migrations, seeds, and test files are excluded from coverage
+- **Multiple Report Formats**: Text, HTML, LCOV, and JSON reports
+
+#### Coverage Reports
+
+When you run `npm run test:coverage`, Jest generates several report formats:
+
+1. **Console Output**: Immediate feedback with coverage percentages
+2. **HTML Report**: Detailed interactive report at `coverage/lcov-report/index.html`
+3. **LCOV Report**: For CI/CD integration (`coverage/lcov.info`)
+4. **JSON Report**: Machine-readable format (`coverage/coverage-final.json`)
+
+#### Current Coverage Status
+
+```
+File            | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+----------------|---------|----------|---------|---------|-------------------
+All files       |   38.51 |    36.56 |   30.76 |    39.2 |
+src/routes/     |    100  |     50   |    100  |    100  |
+src/middleware/ |   51.96 |    53.4  |   63.63 |   53.22 |
+```
+
+#### Improving Coverage
+
+To improve code coverage:
+
+1. **Add Unit Tests**: Create tests for individual functions and modules
+2. **Test Edge Cases**: Cover error conditions and boundary cases  
+3. **Integration Tests**: Test complete request/response cycles
+4. **Mock External Dependencies**: Use Jest mocks for database and external services
+
+#### Coverage Thresholds
+
+The project enforces coverage thresholds to maintain code quality:
+
+- **Global minimum**: 70% across all metrics
+- **Routes directory**: 80% branches, 90% functions/lines/statements
+- **CI/CD Integration**: Coverage reports are generated in LCOV format for integration with tools like Codecov or Coveralls
+
+#### Viewing Coverage Reports
+
+**Option 1: Command Line**
+```bash
+npm run test:coverage
+```
+
+**Option 2: HTML Report (Recommended)**
+```bash
+npm run test:coverage:open
+```
+This runs coverage and automatically opens the HTML report in your browser.
+
+**Option 3: Watch Mode**
+```bash
+npm run test:coverage:watch
+```
+Continuously runs tests with coverage as you make changes.
+
+#### Coverage in CI/CD
+
+The `coverage/lcov.info` file can be used with popular coverage services:
+
+- **GitHub Actions**: Use with codecov/codecov-action
+- **Codecov**: Upload LCOV reports for coverage tracking
+- **Coveralls**: Integrate with coveralls for coverage badges
+
+Example GitHub Actions integration:
+```yaml
+- name: Run tests with coverage
+  run: npm run test:coverage
+
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v3
+  with:
+    file: ./coverage/lcov.info
+```
+
+#### Memory Bank for Future Development
+
+For detailed coverage standards, workflows, and requirements for future LLMs, see [`src/testing/CODE_COVERAGE_MEMORY_BANK.md`](src/testing/CODE_COVERAGE_MEMORY_BANK.md). This file contains critical instructions to ensure code coverage standards are maintained throughout the project lifecycle.
 
 ## Environment Variables
 
