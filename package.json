@@ -8,7 +8,11 @@
     "dev": "nodemon index.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "db:migrate": "knex migrate:latest",
+    "db:rollback": "knex migrate:rollback",
+    "db:seed": "knex seed:run",
+    "db:reset": "knex migrate:rollback --all && knex migrate:latest && knex seed:run"
   },
   "repository": {
     "type": "git",
@@ -29,9 +33,14 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "js-yaml": "^4.1.0",
-    "morgan": "^1.10.1"
+    "knex": "^3.1.0",
+    "morgan": "^1.10.1",
+    "objection": "^3.1.5",
+    "openapi-backend": "^5.13.0",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@types/pg": "^8.15.5",
     "jest": "^30.0.5",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4"
