@@ -4,41 +4,28 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
+// Import the configured OpenAPI backend
+const { api } = require('./app');
+
+// Create Express app
 const app = express();
 
 // Middleware
 app.use(helmet());
 app.use(cors());
 app.use(morgan('combined'));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Use OpenAPI backend as middleware
+app.use((req, res) => api.handleRequest(req, req, res));
 
-// Import route modules
-const indexRoutes = require('./routes/index');
-const healthRoutes = require('./routes/health');
-const eventsRoutes = require('./routes/events');
-
-
-// Routes
-app.use('/', indexRoutes);
-app.use('/health', healthRoutes);
-app.use('/api/events', eventsRoutes);
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
+// Global error handler
+app.use((error, req, res, next) => {
+  console.error('Unhandled error:', error);
   res.status(500).json({
     error: 'Something went wrong!',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Route not found',
-    path: req.originalUrl
+    message: 'Internal server error'
   });
 });
 
