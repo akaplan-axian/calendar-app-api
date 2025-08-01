@@ -25,11 +25,49 @@ A schema-first REST API for calendar applications built with OpenAPI 3.1, Expres
 
 ## Prerequisites
 
-- Node.js (v18 or higher)
+### Option 1: Docker (Recommended)
+- Docker
+- Docker Compose
+
+### Option 2: Local Development
+- Node.js (v22 or higher - see .nvmrc)
 - PostgreSQL (v12 or higher)
 - npm or yarn
 
 ## Installation
+
+### Option 1: Docker Setup (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/akaplan-axian/calendar-app-api.git
+   cd calendar-app-api
+   ```
+
+2. **Start the application with Docker Compose**
+   ```bash
+   docker-compose up -d
+   ```
+   This will:
+   - Build the Node.js application container
+   - Start PostgreSQL database
+   - Install all dependencies (including dev dependencies)
+   - Start the application in development mode with hot reload
+
+3. **Set up the database**
+   ```bash
+   npm run db:setup
+   ```
+   This convenient script runs both migrations and seeds in the Docker container.
+
+4. **View logs (optional)**
+   ```bash
+   docker-compose logs -f app
+   ```
+
+The API will be available at `http://localhost:3000`
+
+### Option 2: Local Development Setup
 
 1. **Clone the repository**
    ```bash
@@ -74,7 +112,22 @@ A schema-first REST API for calendar applications built with OpenAPI 3.1, Expres
 
 ## Usage
 
-### Development
+### Docker Development
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f app
+
+# Stop all services
+docker-compose down
+
+# Rebuild containers
+docker-compose up --build -d
+```
+
+### Local Development
 ```bash
 npm run dev
 ```
@@ -121,6 +174,14 @@ curl -X POST http://localhost:3000/api/events \
 
 ### Available Scripts
 
+#### Docker Environment
+- `npm run db:setup` - Run migrations and seeds in Docker container (recommended for first-time setup)
+- `docker-compose exec app npm run db:migrate` - Run pending migrations
+- `docker-compose exec app npm run db:rollback` - Rollback the last migration
+- `docker-compose exec app npm run db:seed` - Run database seeds
+- `docker-compose exec app npm run db:reset` - Reset database (rollback all + migrate + seed)
+
+#### Local Environment
 - `npm run db:migrate` - Run pending migrations
 - `npm run db:rollback` - Rollback the last migration
 - `npm run db:seed` - Run database seeds
@@ -128,12 +189,24 @@ curl -X POST http://localhost:3000/api/events \
 
 ### Creating Migrations
 
+#### Docker Environment
+```bash
+docker-compose exec app npx knex migrate:make migration_name
+```
+
+#### Local Environment
 ```bash
 npx knex migrate:make migration_name
 ```
 
 ### Creating Seeds
 
+#### Docker Environment
+```bash
+docker-compose exec app npx knex seed:make seed_name
+```
+
+#### Local Environment
 ```bash
 npx knex seed:make seed_name
 ```

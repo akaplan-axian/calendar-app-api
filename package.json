@@ -15,7 +15,8 @@
     "db:migrate": "knex migrate:latest",
     "db:rollback": "knex migrate:rollback",
     "db:seed": "knex seed:run",
-    "db:reset": "knex migrate:rollback --all && knex migrate:latest && knex seed:run"
+    "db:reset": "knex migrate:rollback --all && knex migrate:latest && knex seed:run",
+    "db:setup": "docker-compose exec app npm run db:migrate && docker-compose exec app npm run db:seed"
   },
   "repository": {
     "type": "git",
