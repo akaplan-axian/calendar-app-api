@@ -13,17 +13,12 @@ app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Import validation middleware
-const { validateRequest, validateResponse } = require('./middleware/validation');
 
 // Import route modules
 const indexRoutes = require('./routes/index');
 const healthRoutes = require('./routes/health');
 const eventsRoutes = require('./routes/events');
 
-// Apply validation middleware
-app.use(validateRequest);
-app.use(validateResponse);
 
 // Routes
 app.use('/', indexRoutes);

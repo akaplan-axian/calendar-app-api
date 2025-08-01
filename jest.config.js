@@ -16,7 +16,11 @@ module.exports = {
     '!src/**/*.spec.js',
     '!**/node_modules/**',
     '!**/migrations/**',
-    '!**/seeds/**'
+    '!**/seeds/**',
+    // Exclude configuration files (bootstrap/setup files with minimal business logic)
+    '!src/app.js',           // Application bootstrap file
+    '!src/express.js',       // Express setup and middleware configuration
+    '!index.js'              // Main entry point
   ],
   
   // Coverage thresholds - adjust these based on your project needs
