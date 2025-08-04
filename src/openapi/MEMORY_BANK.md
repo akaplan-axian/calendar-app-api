@@ -6,6 +6,11 @@ This file serves as a memory bank to ensure the OpenAPI specification remains sy
 
 ### 🚨 MANDATORY REQUIREMENTS
 
+**BEFORE CONSIDERING ANY TASK COMPLETE:**
+1. **ALWAYS run `npm test` and ensure ALL tests pass**
+2. **If ANY tests fail, fix them IMMEDIATELY before proceeding**
+3. **Never mark a task as complete with failing tests**
+
 **ALWAYS** update `src/openapi/openapi.yaml` when making ANY of the following changes:
 
 1. **Adding new routes/endpoints**
@@ -116,10 +121,34 @@ paths:
 ### 🔍 Validation
 
 Before completing any API changes:
-1. Ensure the OpenAPI spec can be parsed without errors
-2. Verify all endpoints are documented
-3. Check that examples match actual API responses
-4. Confirm schema types match implementation
+1. **Run `npm run validate-openapi`** to check for warnings and errors
+2. Ensure the OpenAPI spec can be parsed without errors
+3. Verify all endpoints are documented
+4. Check that examples match actual API responses
+5. Confirm schema types match implementation
+
+#### Common Validation Warnings and Solutions
+
+**Warning: "Operation must have at least one `4XX` response"**
+- **Solution**: Add appropriate 4xx responses to all endpoints
+- **Standard responses to add**:
+  - `404`: Use `$ref: '#/components/responses/NotFound'` for endpoints that might not find resources
+  - `400`: Use `$ref: '#/components/responses/ValidationError'` for endpoints with request validation
+  - `500`: Use `$ref: '#/components/responses/InternalServerError'` for all endpoints (server errors can happen anywhere)
+
+**Warning: "Component is never used"**
+- **Solution**: Either use the component in endpoint responses or remove it if truly unnecessary
+- **Common unused components**: Response components in `components/responses` section
+- **Fix**: Reference unused response components in appropriate endpoint responses
+
+#### Validation Best Practices
+
+1. **All GET endpoints should have**: `200`, `404`, `500` responses
+2. **All POST endpoints should have**: `201`, `400`, `500` responses (and `404` if applicable)
+3. **All PUT/PATCH endpoints should have**: `200`, `400`, `404`, `500` responses
+4. **All DELETE endpoints should have**: `204`, `404`, `500` responses
+5. **Always reference response schemas** using `$ref` instead of inline definitions
+6. **Reuse common response components** like `NotFound`, `InternalServerError`, `ValidationError`
 
 ### 📝 Notes for Future Development
 

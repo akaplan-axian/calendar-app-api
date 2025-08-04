@@ -6,6 +6,12 @@ This file serves as a memory bank to ensure code coverage standards are maintain
 
 ### 🚨 MANDATORY REQUIREMENTS
 
+**BEFORE CONSIDERING ANY TASK COMPLETE:**
+1. **ALWAYS run `npm test` and ensure ALL tests pass**
+2. **If ANY tests fail, fix them IMMEDIATELY before proceeding**
+3. **Never mark a task as complete with failing tests**
+4. **Test failures must be resolved, not ignored or bypassed**
+
 **ALWAYS** run code coverage and ensure thresholds are met when making ANY of the following changes:
 
 1. **Adding new code files** (handlers, models, utilities, middleware)

@@ -20,6 +20,11 @@ Model.knex(knex);
 // Load OpenAPI specification
 const openApiSpec = loadOpenAPISpec();
 
+// Debug logging: Log the full OpenAPI specification
+console.log('=== DEBUG: Full OpenAPI Specification ===');
+console.log(JSON.stringify(openApiSpec, null, 2));
+console.log('=== END DEBUG: OpenAPI Specification ===');
+
 // Create OpenAPI backend instance
 const api = new OpenAPIBackend({
   definition: openApiSpec,

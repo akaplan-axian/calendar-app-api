@@ -4,9 +4,8 @@ describe('Express App', () => {
   let app;
 
   beforeEach(() => {
-    // Clear module cache to get fresh app instance
-    jest.resetModules();
-    app = require('../src/express');
+    // Use test-specific app that doesn't require database
+    app = require('./test-express-app');
   });
 
   describe('Middleware Setup', () => {

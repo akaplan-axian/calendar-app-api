@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest",
+    "test": "npm run validate-openapi && jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:coverage:watch": "jest --coverage --watch",
@@ -16,7 +16,10 @@
     "db:rollback": "knex migrate:rollback",
     "db:seed": "knex seed:run",
     "db:reset": "knex migrate:rollback --all && knex migrate:latest && knex seed:run",
-    "db:setup": "docker-compose exec app npm run db:migrate && docker-compose exec app npm run db:seed"
+    "db:setup": "docker-compose exec app npm run db:migrate && docker-compose exec app npm run db:seed",
+    "validate-openapi": "redocly lint --config .redocly.yaml src/openapi/openapi.yaml",
+    "bundle-openapi": "redocly bundle src/openapi/openapi.yaml --output dist/openapi.json",
+    "preview-docs": "redocly preview-docs src/openapi/openapi.yaml"
   },
   "repository": {
     "type": "git",
@@ -44,6 +47,7 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@redocly/cli": "^2.0.2",
     "@types/pg": "^8.15.5",
     "jest": "^30.0.5",
     "nodemon": "^3.1.10",

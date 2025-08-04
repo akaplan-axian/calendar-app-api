@@ -53,7 +53,7 @@ module.exports = {
   coverageDirectory: 'coverage',
   
   // Setup files (if needed)
-  setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   
   // Verbose output
   verbose: true,
