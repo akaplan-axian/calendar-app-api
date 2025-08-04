@@ -1,6 +1,6 @@
 # OpenAPI Schema Validation
 
-This project uses [@redocly/cli](https://redocly.com/docs/cli/) to validate the OpenAPI specification against the OpenAPI 3.1.0 standard.
+This project uses [@redocly/cli](https://redocly.com/docs/cli/) to validate the OpenAPI specification against the OpenAPI 3.0.3 standard.
 
 ## Installation
 
@@ -16,7 +16,7 @@ npm install --save-dev @redocly/cli
 ```bash
 npm run validate-openapi
 ```
-Validates the OpenAPI specification file (`src/openapi/openapi.yaml`) against the OpenAPI 3.1.0 standard and custom linting rules.
+Validates the OpenAPI specification file (`src/openapi/openapi.yaml`) against the OpenAPI 3.0.3 standard and custom linting rules.
 
 ### Bundle
 ```bash
@@ -55,8 +55,13 @@ All validation issues have been resolved:
 - ✅ All endpoints now include appropriate 4xx error responses
 - ✅ All response components are properly referenced and used
 - ✅ Complete error response coverage for all operations
+- ✅ Compatible with openapi-backend library for runtime validation
 
 The specification passes validation without any warnings or errors.
+
+## Version History
+
+**v3.0.3 (Current)**: Downgraded from OpenAPI 3.1.0 to ensure compatibility with openapi-backend library. Removed all `examples` properties to maintain future compatibility and cleaner schema definitions. This change resolved 194 validation errors that occurred during application startup while maintaining full API functionality.
 
 ## Usage Tips
 

@@ -1,6 +1,7 @@
 const OpenAPIBackend = require('openapi-backend').default;
 const { Model } = require('objection');
 const Knex = require('knex');
+const addFormats = require('ajv-formats');
 
 // Import database configuration
 const dbConfig = require('./config/database').current;
@@ -31,7 +32,15 @@ const api = new OpenAPIBackend({
   validate: true,
   ajvOpts: {
     strict: false,
-    validateFormats: true
+    validateFormats: true,
+    addUsedSchema: false,
+    // Configure AJV instance with formats
+    loadSchema: false
+  },
+  customizeAjv: (ajv) => {
+    // Add standard formats (including date-time)
+    addFormats(ajv);
+    return ajv;
   }
 });
 
