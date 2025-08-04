@@ -18,7 +18,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Use OpenAPI backend as middleware
-app.use((req, res) => api.handleRequest(req, res));
+app.use((req, res) => api.handleRequest(req, req, res));
 
 // Global error handler
 app.use((error, req, res, next) => {
