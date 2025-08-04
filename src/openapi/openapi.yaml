@@ -97,6 +97,24 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /api/openapi.json:
+    get:
+      summary: Get OpenAPI schema
+      description: Returns the OpenAPI specification in JSON format
+      operationId: getOpenAPISchema
+      tags:
+        - General
+      responses:
+        '200':
+          description: OpenAPI schema retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OpenAPI 3.0.3 specification
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   schemas:
     ApiInfo:

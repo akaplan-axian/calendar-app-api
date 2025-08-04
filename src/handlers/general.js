@@ -1,3 +1,5 @@
+const { loadOpenAPISpec } = require('../utils/openapi');
+
 // Handler for getApiInfo operation
 async function getApiInfo(c, req, res) {
   try {
@@ -15,6 +17,21 @@ async function getApiInfo(c, req, res) {
   }
 }
 
+// Handler for getOpenAPISchema operation
+async function getOpenAPISchema(c, req, res) {
+  try {
+    const openApiSpec = loadOpenAPISpec();
+    res.status(200).json(openApiSpec);
+  } catch (error) {
+    console.error('Error loading OpenAPI schema:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to load OpenAPI schema'
+    });
+  }
+}
+
 module.exports = {
-  getApiInfo
+  getApiInfo,
+  getOpenAPISchema
 };

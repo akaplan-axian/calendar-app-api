@@ -10,7 +10,7 @@ const dbConfig = require('./config/database').current;
 const { loadOpenAPISpec } = require('./utils/openapi');
 
 // Import handlers
-const { getApiInfo } = require('./handlers/general');
+const { getApiInfo, getOpenAPISchema } = require('./handlers/general');
 const { getHealthStatus } = require('./handlers/health');
 const { getCalendarEvents, createCalendarEvent } = require('./handlers/events');
 
@@ -48,6 +48,7 @@ const api = new OpenAPIBackend({
 api.register({
   // Map operationIds to handler functions
   getApiInfo,
+  getOpenAPISchema,
   getHealthStatus,
   getCalendarEvents,
   createCalendarEvent,
