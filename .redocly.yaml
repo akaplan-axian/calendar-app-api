@@ -1,0 +1,15 @@
+apis:
+  main:
+    root: src/openapi/openapi.yaml
+    rules:
+      # Disable security-defined rule since this is a development API
+      security-defined: off
+      
+      # Allow localhost and example.com for development
+      no-server-example.com: off
+      
+      # Allow missing 4xx responses for simple endpoints
+      operation-4xx-response: warn
+      
+      # Allow unused components (they might be used later)
+      no-unused-components: warn
