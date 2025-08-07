@@ -7,7 +7,7 @@ async function getCalendarEvents(c, req, res) {
     
     res.status(200).json({
       events: events,
-      message: events.length > 0 ? `Found ${events.length} events` : 'No events found'
+      message: 'Events retrieved successfully'
     });
   } catch (error) {
     console.error('Error fetching events:', error);

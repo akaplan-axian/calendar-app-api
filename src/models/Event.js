@@ -55,6 +55,13 @@ class Event extends Model {
     delete json.createdAt;
     delete json.updatedAt;
     
+    // Remove null values to keep the API response clean
+    Object.keys(json).forEach(key => {
+      if (json[key] === null) {
+        delete json[key];
+      }
+    });
+    
     return json;
   }
 }
