@@ -1,0 +1,292 @@
+openapi: 3.0.3
+info:
+  title: Calendar App API
+  description: API for calendar application
+  version: 1.0.0
+  contact:
+    url: https://github.com/akaplan-axian/calendar-app-api
+  license:
+    name: ISC
+    url: https://opensource.org/licenses/ISC
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server (placeholder)
+
+paths:
+  /:
+    get:
+      summary: Get API information
+      description: Returns basic information about the Calendar App API
+      operationId: getApiInfo
+      tags:
+        - General
+      responses:
+        '200':
+          description: API information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiInfo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the API
+      operationId: getHealthStatus
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Health status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/events:
+    get:
+      summary: Get calendar events
+      description: Returns a list of calendar events (currently returns empty array as placeholder)
+      operationId: getCalendarEvents
+      tags:
+        - Events
+      responses:
+        '200':
+          description: Calendar events retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      summary: Create a calendar event
+      description: Creates a new calendar event with validation
+      operationId: createCalendarEvent
+      tags:
+        - Events
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEventResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/openapi.json:
+    get:
+      summary: Get OpenAPI schema
+      description: Returns the OpenAPI specification in JSON format
+      operationId: getOpenAPISchema
+      tags:
+        - General
+      responses:
+        '200':
+          description: OpenAPI schema retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OpenAPI 3.0.3 specification
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    ApiInfo:
+      type: object
+      properties:
+        message:
+          type: string
+        version:
+          type: string
+        status:
+          type: string
+      required:
+        - message
+        - version
+        - status
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - status
+        - timestamp
+
+    EventsResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        message:
+          type: string
+      required:
+        - events
+        - message
+
+    CreateEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        location:
+          type: string
+          maxLength: 200
+      required:
+        - title
+        - startDate
+        - endDate
+
+    Event:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        location:
+          type: string
+      required:
+        - title
+        - startDate
+        - endDate
+
+    CreateEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+        event:
+          $ref: '#/components/schemas/Event'
+      required:
+        - id
+        - message
+        - event
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        path:
+          type: string
+      required:
+        - error
+        - path
+
+    InternalServerErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    ValidationErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+        rejectedValue: {}
+      required:
+        - field
+        - message
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationErrorDetail'
+      required:
+        - error
+        - details
+
+  responses:
+    NotFound:
+      description: The requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InternalServerErrorResponse'
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+
+tags:
+  - name: General
+    description: General API information
+  - name: Health
+    description: Health check endpoints
+  - name: Events
+    description: Calendar events management
