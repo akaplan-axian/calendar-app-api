@@ -12,7 +12,7 @@ const { loadOpenAPISpec } = require('./utils/openapi');
 // Import handlers
 const { getApiInfo, getOpenAPISchema } = require('./handlers/general');
 const { getHealthStatus } = require('./handlers/health');
-const { getCalendarEvents, createCalendarEvent } = require('./handlers/events');
+const { getCalendarEvents, createCalendarEvent, getCalendarEvent, updateCalendarEvent, deleteCalendarEvent } = require('./handlers/events');
 
 // Initialize Knex and bind it to Objection.js
 const knex = Knex(dbConfig);
@@ -52,6 +52,9 @@ api.register({
   getHealthStatus,
   getCalendarEvents,
   createCalendarEvent,
+  getCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
   
   // Default handlers
   notFound: (c, req, res) => {

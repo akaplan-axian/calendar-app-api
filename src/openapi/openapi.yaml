@@ -97,6 +97,90 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /api/events/{id}:
+    get:
+      summary: Get a calendar event by ID
+      description: Returns a specific calendar event by its ID
+      operationId: getCalendarEvent
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the event to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    put:
+      summary: Update a calendar event
+      description: Updates an existing calendar event with validation
+      operationId: updateCalendarEvent
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the event to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEventRequest'
+      responses:
+        '200':
+          description: Event updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateEventResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      summary: Delete a calendar event
+      description: Deletes a calendar event by its ID
+      operationId: deleteCalendarEvent
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the event to delete
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteEventResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /api/openapi.json:
     get:
       summary: Get OpenAPI schema
@@ -112,6 +196,8 @@ paths:
               schema:
                 type: object
                 description: OpenAPI 3.0.3 specification
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -213,6 +299,66 @@ components:
         - id
         - message
         - event
+
+    EventResponse:
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/Event'
+        message:
+          type: string
+      required:
+        - event
+        - message
+
+    UpdateEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        location:
+          type: string
+          maxLength: 200
+      required:
+        - title
+        - startDate
+        - endDate
+
+    UpdateEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+        event:
+          $ref: '#/components/schemas/Event'
+      required:
+        - id
+        - message
+        - event
+
+    DeleteEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+      required:
+        - id
+        - message
 
     ErrorResponse:
       type: object
