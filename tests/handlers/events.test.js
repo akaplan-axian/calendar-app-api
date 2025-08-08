@@ -24,8 +24,8 @@ describe('Events Handlers', () => {
   describe('getCalendarEvents', () => {
     it('should return events successfully when events exist', async () => {
       const mockEvents = [
-        { id: 'evt_1', title: 'Event 1', startDate: '2025-07-28T10:00:00Z' },
-        { id: 'evt_2', title: 'Event 2', startDate: '2025-07-29T14:00:00Z' }
+        { id: '550e8400-e29b-41d4-a716-446655440001', title: 'Event 1', startDate: '2025-07-28T10:00:00Z' },
+        { id: '550e8400-e29b-41d4-a716-446655440002', title: 'Event 2', startDate: '2025-07-29T14:00:00Z' }
       ];
 
       const mockQuery = {
@@ -96,7 +96,7 @@ describe('Events Handlers', () => {
       };
       
       const createdEvent = {
-        id: 'evt_123',
+        id: '550e8400-e29b-41d4-a716-446655440003',
         ...eventData
       };
 
@@ -214,14 +214,14 @@ describe('Events Handlers', () => {
     beforeEach(() => {
       mockContext = {
         request: {
-          params: { id: 'evt_123' }
+          params: { id: '550e8400-e29b-41d4-a716-446655440004' }
         }
       };
     });
 
     it('should return event successfully when event exists', async () => {
       const mockEvent = {
-        id: 'evt_123',
+        id: '550e8400-e29b-41d4-a716-446655440004',
         title: 'Test Event',
         startDate: '2025-07-28T10:00:00Z',
         endDate: '2025-07-28T11:00:00Z'
@@ -235,7 +235,7 @@ describe('Events Handlers', () => {
       await getCalendarEvent(mockContext, mockReq, mockRes);
 
       expect(Event.query).toHaveBeenCalled();
-      expect(mockQuery.findById).toHaveBeenCalledWith('evt_123');
+      expect(mockQuery.findById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440004');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         event: mockEvent,
@@ -251,11 +251,11 @@ describe('Events Handlers', () => {
 
       await getCalendarEvent(mockContext, mockReq, mockRes);
 
-      expect(mockQuery.findById).toHaveBeenCalledWith('evt_123');
+      expect(mockQuery.findById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440004');
       expect(mockRes.status).toHaveBeenCalledWith(404);
       expect(mockRes.json).toHaveBeenCalledWith({
         error: 'Not found',
-        message: "Event with ID 'evt_123' not found"
+        message: "Event with ID '550e8400-e29b-41d4-a716-446655440004' not found"
       });
     });
 
@@ -285,7 +285,7 @@ describe('Events Handlers', () => {
     beforeEach(() => {
       mockContext = {
         request: {
-          params: { id: 'evt_123' }
+          params: { id: '550e8400-e29b-41d4-a716-446655440005' }
         }
       };
       mockReq.body = {
@@ -297,7 +297,7 @@ describe('Events Handlers', () => {
 
     it('should update event successfully', async () => {
       const updatedEvent = {
-        id: 'evt_123',
+        id: '550e8400-e29b-41d4-a716-446655440005',
         ...mockReq.body
       };
 
@@ -309,7 +309,7 @@ describe('Events Handlers', () => {
       await updateCalendarEvent(mockContext, mockReq, mockRes);
 
       expect(Event.query).toHaveBeenCalled();
-      expect(mockQuery.patchAndFetchById).toHaveBeenCalledWith('evt_123', mockReq.body);
+      expect(mockQuery.patchAndFetchById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440005', mockReq.body);
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         id: updatedEvent.id,
@@ -326,11 +326,11 @@ describe('Events Handlers', () => {
 
       await updateCalendarEvent(mockContext, mockReq, mockRes);
 
-      expect(mockQuery.patchAndFetchById).toHaveBeenCalledWith('evt_123', mockReq.body);
+      expect(mockQuery.patchAndFetchById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440005', mockReq.body);
       expect(mockRes.status).toHaveBeenCalledWith(404);
       expect(mockRes.json).toHaveBeenCalledWith({
         error: 'Not found',
-        message: "Event with ID 'evt_123' not found"
+        message: "Event with ID '550e8400-e29b-41d4-a716-446655440005' not found"
       });
     });
 
@@ -385,7 +385,7 @@ describe('Events Handlers', () => {
     beforeEach(() => {
       mockContext = {
         request: {
-          params: { id: 'evt_123' }
+          params: { id: '550e8400-e29b-41d4-a716-446655440006' }
         }
       };
     });
@@ -399,10 +399,10 @@ describe('Events Handlers', () => {
       await deleteCalendarEvent(mockContext, mockReq, mockRes);
 
       expect(Event.query).toHaveBeenCalled();
-      expect(mockQuery.deleteById).toHaveBeenCalledWith('evt_123');
+      expect(mockQuery.deleteById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440006');
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
-        id: 'evt_123',
+        id: '550e8400-e29b-41d4-a716-446655440006',
         message: 'Event deleted successfully'
       });
     });
@@ -415,11 +415,11 @@ describe('Events Handlers', () => {
 
       await deleteCalendarEvent(mockContext, mockReq, mockRes);
 
-      expect(mockQuery.deleteById).toHaveBeenCalledWith('evt_123');
+      expect(mockQuery.deleteById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440006');
       expect(mockRes.status).toHaveBeenCalledWith(404);
       expect(mockRes.json).toHaveBeenCalledWith({
         error: 'Not found',
-        message: "Event with ID 'evt_123' not found"
+        message: "Event with ID '550e8400-e29b-41d4-a716-446655440006' not found"
       });
     });
 

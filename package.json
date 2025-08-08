@@ -47,7 +47,8 @@
     "morgan": "^1.10.1",
     "objection": "^3.1.5",
     "openapi-backend": "^5.13.0",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@redocly/cli": "^2.0.2",

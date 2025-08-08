@@ -1,4 +1,5 @@
 const { Model } = require('objection');
+const { v4: uuidv4 } = require('uuid');
 const { getOpenAPISchema } = require('../utils/openapi');
 
 class Event extends Model {
@@ -39,7 +40,7 @@ class Event extends Model {
     
     // Generate ID if not provided
     if (!this.id) {
-      this.id = 'evt_' + Math.random().toString(36).substr(2, 9);
+      this.id = uuidv4();
     }
   }
 

@@ -111,6 +111,7 @@ paths:
           description: The ID of the event to retrieve
           schema:
             type: string
+            format: uuid
       responses:
         '200':
           description: Event retrieved successfully
@@ -136,6 +137,7 @@ paths:
           description: The ID of the event to update
           schema:
             type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -169,6 +171,7 @@ paths:
           description: The ID of the event to delete
           schema:
             type: string
+            format: uuid
       responses:
         '200':
           description: Event deleted successfully
@@ -269,6 +272,9 @@ components:
     Event:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         title:
           type: string
         description:
