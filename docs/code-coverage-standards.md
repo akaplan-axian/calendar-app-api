@@ -1,4 +1,4 @@
-# Code Coverage Memory Bank
+# Code Coverage Standards
 
 ## Critical Instructions for Future LLMs
 
@@ -291,6 +291,242 @@ If coverage thresholds are not met:
 - Review critical path coverage
 - Generate coverage reports for documentation
 
+## Coverage Configuration Details
+
+### Jest Configuration
+
+The coverage configuration in `jest.config.js`:
+
+```javascript
+module.exports = {
+  // Coverage collection
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
+  
+  // Coverage reporters
+  coverageReporters: [
+    'text',        // Console output
+    'lcov',        // For CI/CD integration
+    'html',        // Interactive HTML report
+    'json'         // Machine-readable format
+  ],
+  
+  // Files to include in coverage
+  collectCoverageFrom: [
+    'src/**/*.js',
+    '!src/migrations/**',
+    '!src/seeds/**',
+    '!**/node_modules/**'
+  ],
+  
+  // Coverage thresholds
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70
+    },
+    './src/routes/': {
+      branches: 80,
+      functions: 90,
+      lines: 90,
+      statements: 90
+    }
+  }
+};
+```
+
+### Coverage Reports Structure
+
+```
+coverage/
+├── lcov-report/           # HTML report (interactive)
+│   ├── index.html         # Main coverage report
+│   ├── src/
+│   │   ├── handlers/
+│   │   ├── models/
+│   │   └── routes/
+├── lcov.info             # LCOV format (for CI/CD)
+├── coverage-final.json   # JSON format
+└── clover.xml           # Clover format
+```
+
+### Understanding Coverage Metrics
+
+#### Statements Coverage
+- **Definition**: Percentage of executable statements that were executed
+- **Goal**: Ensure all code paths are tested
+- **Example**: `if (condition) { statement; }` - both the condition and statement count
+
+#### Branch Coverage
+- **Definition**: Percentage of decision branches that were executed
+- **Goal**: Test all conditional paths (if/else, switch cases, ternary operators)
+- **Example**: `if (condition)` - test both true and false paths
+
+#### Function Coverage
+- **Definition**: Percentage of functions that were called during tests
+- **Goal**: Ensure all functions are tested
+- **Example**: Every function definition should be invoked at least once
+
+#### Line Coverage
+- **Definition**: Percentage of executable lines that were executed
+- **Goal**: Similar to statement coverage but line-based
+- **Example**: Multi-statement lines count as one line
+
+### Coverage Improvement Techniques
+
+#### 1. Identify Uncovered Code
+
+```bash
+# Generate coverage and open HTML report
+npm run test:coverage:open
+
+# Look for red/yellow highlighted lines in the HTML report
+# Focus on critical business logic first
+```
+
+#### 2. Add Targeted Tests
+
+```javascript
+// Example: Testing error conditions
+describe('Error Handling', () => {
+  test('should handle database connection errors', async () => {
+    // Mock database to throw error
+    jest.spyOn(Event, 'query').mockImplementation(() => {
+      throw new Error('Database connection failed');
+    });
+    
+    const response = await request(app)
+      .get('/api/events')
+      .expect(500);
+    
+    expect(response.body.error.code).toBe('INTERNAL_ERROR');
+  });
+});
+```
+
+#### 3. Test Edge Cases
+
+```javascript
+// Example: Testing boundary conditions
+describe('Input Validation', () => {
+  test('should handle empty title', async () => {
+    const response = await request(app)
+      .post('/api/events')
+      .send({
+        title: '',  // Empty string
+        startDate: '2025-08-01T10:00:00Z',
+        endDate: '2025-08-01T11:00:00Z'
+      })
+      .expect(400);
+  });
+  
+  test('should handle very long title', async () => {
+    const longTitle = 'a'.repeat(1000);  // Very long string
+    const response = await request(app)
+      .post('/api/events')
+      .send({
+        title: longTitle,
+        startDate: '2025-08-01T10:00:00Z',
+        endDate: '2025-08-01T11:00:00Z'
+      })
+      .expect(400);
+  });
+});
+```
+
+#### 4. Test All Branches
+
+```javascript
+// Example: Testing conditional logic
+const processEvent = (event) => {
+  if (!event.title) {
+    return { error: 'Title required' };
+  }
+  
+  if (event.startDate > event.endDate) {
+    return { error: 'Invalid date range' };
+  }
+  
+  return { success: true, event };
+};
+
+// Tests for all branches
+describe('processEvent', () => {
+  test('should process valid event', () => {
+    const result = processEvent({
+      title: 'Test',
+      startDate: '2025-08-01T10:00:00Z',
+      endDate: '2025-08-01T11:00:00Z'
+    });
+    expect(result.success).toBe(true);
+  });
+  
+  test('should reject event without title', () => {
+    const result = processEvent({
+      startDate: '2025-08-01T10:00:00Z',
+      endDate: '2025-08-01T11:00:00Z'
+    });
+    expect(result.error).toBe('Title required');
+  });
+  
+  test('should reject event with invalid date range', () => {
+    const result = processEvent({
+      title: 'Test',
+      startDate: '2025-08-01T11:00:00Z',
+      endDate: '2025-08-01T10:00:00Z'
+    });
+    expect(result.error).toBe('Invalid date range');
+  });
+});
+```
+
+### Continuous Integration Integration
+
+#### GitHub Actions Example
+
+```yaml
+name: Test and Coverage
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run tests with coverage
+      run: npm run test:coverage
+      
+    - name: Check coverage thresholds
+      run: npm run coverage:check
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        fail_ci_if_error: true
+```
+
+#### Coverage Badges
+
+Add coverage badges to README.md:
+
+```markdown
+[![Coverage Status](https://codecov.io/gh/username/repo/branch/main/graph/badge.svg)](https://codecov.io/gh/username/repo)
+```
+
 ---
 
 **Remember: High test coverage doesn't guarantee bug-free code, but low coverage almost guarantees bugs will slip through. Aim for meaningful tests that cover real-world scenarios.**
@@ -299,11 +535,16 @@ If coverage thresholds are not met:
 
 - `jest.config.js` - Coverage configuration
 - `package.json` - Coverage scripts
-- `tests/app.test.js` - Current test suite
-- `README.md` - Coverage documentation
+- `tests/` - Test suite directory
 - `coverage/lcov-report/index.html` - Detailed coverage report
+
+## Related Documentation
+
+- [Testing Guide](testing.md) - Comprehensive testing strategies
+- [Development Guide](development.md) - Development workflow including testing
+- [Installation Guide](installation.md) - Setting up the test environment
 
 ---
 
-**Last Updated**: 2025-07-31
-**Next Review**: When coverage drops below 35% overall or any file drops below its threshold
+**Last Updated**: 2025-08-08
+**Next Review**: When coverage drops below 90% overall or any file drops below its threshold
